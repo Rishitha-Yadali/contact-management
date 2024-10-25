@@ -1,0 +1,37 @@
+import sqlite3 from 'sqlite3';
+import { open } from 'sqlite';
+
+export async function openDb() {
+  return open({
+    filename: './contacts-db/contacts.db', // Adjust path as needed
+    driver: sqlite3.Database,
+  });
+}
+
+export async function createTables() {
+  const db = await openDb();
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT UNIQUE,
+      password TEXT,
+      is_verified INTEGER DEFAULT 0,
+      verification_token TEXT
+    );
+    CREATE TABLE IF NOT EXISTS contacts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId INTEGER,
+      name TEXT,
+      email TEXT,
+      phone TEXT,
+      address TEXT,
+      timezone TEXT,
+      created_at TEXT,
+      updated_at TEXT,
+      FOREIGN KEY(userId) REFERENCES users(id)
+    );
+  `);
+}
+
+// Call to create tables when the application starts
+createTables();
